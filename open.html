@@ -1,29 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Open Link</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            background: #111;
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial;
-        }
-        button {
-            padding: 20px 40px;
-            background: #00aaff;
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-size: 25px;
-            cursor: pointer;
-        }
-    </style>
+<title>Open Link</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body {
+        background: #111;
+        color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        font-family: Arial;
+    }
+    button {
+        padding: 20px 40px;
+        background: #00aaff;
+        border: none;
+        border-radius: 10px;
+        color: white;
+        font-size: 25px;
+        cursor: pointer;
+    }
+</style>
 </head>
 <body>
 
@@ -31,58 +31,37 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
-    function getParameter(name) {
-        const url = new URL(window.location.href);
-        return url.searchParams.get(name);
+function getParameter(name) {
+    return new URL(window.location.href).searchParams.get(name);
+}
+
+function openLink() {
+    const link = getParameter("link");
+    if (!link) return alert("No link found.");
+
+    // 1. Try using Telegram API (may still open internal browser)
+    if (window.Telegram?.WebApp) {
+        Telegram.WebApp.openLink(link, { try_instant_view: false });
+        return;
     }
 
-    function openLink() {
-        const link = getParameter("link");
-        if (link) {
-            // Try to force Chrome browser on Android
-            if (window.Telegram && window.Telegram.WebApp) {
-                // Use Telegram WebApp API to open in external browser
-                window.Telegram.WebApp.openLink(link, {try_instant_view: false});
-            } else {
-                // Fallback methods to try to open in Chrome
-                
-                // Method 1: Try Chrome intent on Android
-                const chromeIntent = "intent://" + link.replace(/^https?:\/\//, "") + "#Intent;scheme=https;package=com.android.chrome;end";
-                
-                // Method 2: Try googlechrome:// scheme
-                const chromeScheme = link.replace(/^https?:\/\//, "googlechrome://");
-                
-                // Try different methods
-                const attempts = [
-                    chromeIntent,
-                    chromeScheme,
-                    link
-                ];
-                
-                // Try Chrome intent first
-                let opened = false;
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = chromeIntent;
-                document.body.appendChild(iframe);
-                
-                // Fallback after short delay
-                setTimeout(() => {
-                    if (!opened) {
-                        window.location.href = link;
-                    }
-                }, 500);
-            }
-        } else {
-            alert("No link found.");
-        }
-    }
-    
-    // Initialize Telegram WebApp if available
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
-    }
+    // 2. Try Chrome intent as hard override
+    const chromeIntent =
+        "intent://" + link.replace(/^https?:\/\//, "") +
+        "#Intent;scheme=https;package=com.android.chrome;end";
+
+    window.location.href = chromeIntent;
+
+    // 3. Fallback to normal link after delay
+    setTimeout(() => {
+        window.location.href = link;
+    }, 700);
+}
+
+if (window.Telegram?.WebApp) {
+    Telegram.WebApp.ready();
+    Telegram.WebApp.expand();
+}
 </script>
 
 </body>
