@@ -24,12 +24,12 @@
             cursor: pointer;
         }
     </style>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
 <button onclick="openLink()">OPEN NOW</button>
 
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
     function getParameter(name) {
         const url = new URL(window.location.href);
@@ -39,16 +39,49 @@
     function openLink() {
         const link = getParameter("link");
         if (link) {
-            // Try to open in external browser (Chrome)
+            // Try to force Chrome browser on Android
             if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.openLink(link);
+                // Use Telegram WebApp API to open in external browser
+                window.Telegram.WebApp.openLink(link, {try_instant_view: false});
             } else {
-                // Fallback for non-Telegram environments
-                window.open(link, '_blank');
+                // Fallback methods to try to open in Chrome
+                
+                // Method 1: Try Chrome intent on Android
+                const chromeIntent = "intent://" + link.replace(/^https?:\/\//, "") + "#Intent;scheme=https;package=com.android.chrome;end";
+                
+                // Method 2: Try googlechrome:// scheme
+                const chromeScheme = link.replace(/^https?:\/\//, "googlechrome://");
+                
+                // Try different methods
+                const attempts = [
+                    chromeIntent,
+                    chromeScheme,
+                    link
+                ];
+                
+                // Try Chrome intent first
+                let opened = false;
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = chromeIntent;
+                document.body.appendChild(iframe);
+                
+                // Fallback after short delay
+                setTimeout(() => {
+                    if (!opened) {
+                        window.location.href = link;
+                    }
+                }, 500);
             }
         } else {
             alert("No link found.");
         }
+    }
+    
+    // Initialize Telegram WebApp if available
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
     }
 </script>
 
