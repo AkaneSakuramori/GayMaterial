@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Open Link</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background: #111;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial;
+        }
+        button {
+            padding: 20px 40px;
+            background: #00aaff;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 25px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<button onclick="openLink()">OPEN NOW</button>
+
+<script>
+    function getParameter(name) {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name);
+    }
+
+    function openLink() {
+        const link = getParameter("link");
+        if (link) {
+            window.location.href = link;
+        } else {
+            alert("No link found.");
+        }
+    }
+</script>
+
+</body>
+</html>
